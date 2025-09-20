@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    .finish-btn {
+      background: #222c;
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.5);
+      border-radius: 32px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      font-family: 'Quicksand', Arial, sans-serif;
+      padding: 8px 24px;
+      min-width: 120px;
+      max-width: 220px;
+      margin: 8px 0;
+      cursor: pointer;
+      box-shadow: 0 2px 8px #000a;
+      transition: background 0.2s, box-shadow 0.2s;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .finish-btn-blue {
+      background: #2196f3;
+      color: #fff;
+      border: 1px solid #2196f3;
+    }
+    .finish-btn-red {
+      background: #e53935;
+      color: #fff;
+      border: 1px solid #e53935;
+    }
+    .finish-btn-blue:hover {
+      background: #1565c0;
+      color: #fff;
+      box-shadow: 0 2px 16px #2196f3a0;
+    }
+    .finish-btn-red:hover {
+      background: #b71c1c;
+      color: #fff;
+      box-shadow: 0 2px 16px #e53935a0;
+    }
+    #score-timer a:hover {
+      transform: scale(1.1);
+      transition: transform 0.2s;
+    }
+    #score-timer a {
+      transition: transform 0.2s;
+    }
+  </style>
+  <meta charset="UTF-8">
+  <title>Hot or Cold</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    html, body {
+    height: 100%;
+    margin: 0;
+    padding: 5px;
+    overflow: hidden;
+    background: #222;
+    font-family: 'Quicksand', Arial, sans-serif;
+  font-family: 'Quicksand', Arial, sans-serif;
+  font-family: 'Quicksand', Arial, sans-serif;
+  font-family: 'Quicksand', Arial, sans-serif;
+    }
+    #game-cube {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      background: #e53935;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      transition: box-shadow 0.2s;
+      z-index: 500;
+    }
+    #game-cube-blue {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      background: #2196f3;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      transition: box-shadow 0.2s;
+      z-index: 500;
+    }
+    #rect-grid {
+      position: flex;
+      left: 0; top: 0;
+      width: 99vw;
+      height: 98vh;
+      display: grid;
+      /* grid-template-columns and rows will be set dynamically */
+      pointer-events: none;
+    }
+    .rect {
+      position: relative;
+      border-radius: 8px;
+      box-shadow: none;
+      border: 1px solid #fff !important;
+      transition: box-shadow 0.2s, background 0.2s;
+      z-index: 2;
+      pointer-events: auto;
+      color: #fff;
+      overflow: hidden;
+    }
+    .rect .color-underlay {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      z-index: 1;
+      border-radius: 8px;
+      transition: background 0.2s;
+    }
+  /* Color gradient array: blue to red */
+  /* 0: blue, 1-10: gradient, 11: red */
+    .rect .black-overlay {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+  /* Default overlay style, will be overridden in JS for speed mode */
+  background: #222;
+  opacity: 1;
+      border-radius: 8px;
+      z-index: 2;
+      pointer-events: none;
+      transition: opacity 0.2s;
+    }
+    .rect.bounce {
+      animation: bounce 0.3s;
+    }
+    @keyframes bounce {
+      0% { transform: scale(1); }
+      40% { transform: scale(1.2); }
+      100% { transform: scale(1); }
+    }
+    #popup {
+      display: none;
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0,0,0,0.4);
+      z-index: 5000;
+      align-items: center;
+      justify-content: center;
+    }
+    #popup > div {
+      background: #fff;
+      padding: 32px 48px;
+      border-radius: 16px;
+      box-shadow: 0 4px 32px #0006;
+      position: relative;
+      min-width: 240px;
+      min-height: 80px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    #popup span {
+      position: absolute;
+      top: 12px;
+      right: 18px;
+      font-size: 2rem;
+      cursor: pointer;
+    }
+    #win-screen {
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(33,150,243,0.92);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3em;
+      z-index: 3000;
+      display: none;
+      flex-direction: column;
+    }
+    .highlight {
+      box-shadow: 0 0 24px 8px #ffd600;
+      background: #fffde7 !important;
+      border-color: #ffd600 !important;
+    }
+  </style>
+</head>
+<body>
+    <!-- Home button removed from floating position -->
+  <div id="score-timer" style="position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:2000;font-size:2rem;background:#222c;padding:8px 10px;border-radius:50px;color:#fff;box-shadow:0 2px 8px #000a;display:flex;gap:32px;align-items:center;border:1px solid rgba(255,255,255,0.5);padding-right:20px;min-width:480px;max-width:600px;">
+    <span id="score-label-p1" style="min-width:120px;max-width:120px;display:inline-block;text-align:left;color:#e53935;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">P1: <span id="score-p1">0</span></span>
+    <div style="display:flex;flex-direction:row;align-items:center;justify-content:center;gap:16px;min-width:180px;max-width:180px;">
+  <a href="home.html" style="width:48px;height:48px;min-width:48px;min-height:48px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.15);padding:4px;border-radius:50%;text-decoration:none;box-shadow:0 2px 12px #000a;">
+        <img src="assets/home.png" alt="Home" style="width:30px;height:30px;filter:invert(1) drop-shadow(0 2px 8px #000a);">
+      </a>
+      <span id="timer-label" style="white-space:nowrap;">Time: <span id="timer">0:00</span></span>
+    </div>
+    <span id="score-label-p2" style="min-width:120px;max-width:120px;display:inline-block;text-align:right;color:#2196f3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">P2: <span id="score-p2">0</span></span>
+  </div>
+  <div id="game-cube"></div>
+  <div id="game-cube-blue" style="display:none"></div>
+    <div id="rect-grid"></div>
+    <div id="finished-screen" style="display:none;position:fixed;left:0;top:0;width:100vw;height:100vh;background:rgba(33,33,33,0.95);color:#fff;z-index:5000;align-items:center;justify-content:center;flex-direction:column;font-size:2rem;">
+      <div style="background:#222;padding:48px 64px;border-radius:24px;box-shadow:0 4px 32px #000a;display:flex;flex-direction:column;align-items:center;">
+        <div id="finished-message" style="margin-bottom:32px;"></div>
+        <button onclick="window.location.href='home.html'" class="finish-btn finish-btn-blue">Go to Menu</button>
+        <button onclick="location.reload()" class="finish-btn finish-btn-red">Try Again</button>
+      </div>
+    </div>
+  <div id="found-popup" style="display:none;position:fixed;background:rgba(34,34,34,0.5);color:#fff;padding:4px 12px;border-radius:10px;z-index:10000;box-shadow:0 0 12px #000;min-width:32px;max-width:60px;text-align:center;opacity:1;transition:opacity 1.8s, transform 1.8s;">
+      <span style="font-size:1.2em;display:block;text-align:center;">+1</span>
+    </div>
+    <script>
+      function showFinishedScreen(message) {
+        let finalMessage = message;
+        if (playerMode === 'multi') {
+          const p1ScoreHtml = `<span style='color:#e53935'>P1: ${scoreP1}</span>`;
+          const p2ScoreHtml = `<span style='color:#2196f3'>P2: ${scoreP2}</span>`;
+          if (scoreP1 > scoreP2) {
+            finalMessage = `Player 1 wins!<br>${p1ScoreHtml} &nbsp; ${p2ScoreHtml}<br>Difference: ${scoreP1 - scoreP2}`;
+          } else if (scoreP2 > scoreP1) {
+            finalMessage = `Player 2 wins!<br>${p1ScoreHtml} &nbsp; ${p2ScoreHtml}<br>Difference: ${scoreP2 - scoreP1}`;
+          } else {
+            finalMessage = `It's a tie!<br>${p1ScoreHtml} &nbsp; ${p2ScoreHtml}`;
+          }
+        } else {
+          // Single player mode: show original score and time
+          finalMessage = message.replace('Your score:', `<span style='color:#e53935'>Your score:</span>`);
+        }
+        document.getElementById('finished-message').innerHTML = finalMessage;
+        document.getElementById('finished-screen').style.display = 'flex';
+        canMove = false;
+        if (timerInterval) clearInterval(timerInterval);
+      }
+      // Read query params
+      function getParams() {
+        const params = {};
+        window.location.search.replace(/\??(?:([^=&]+)=([^&]*)&?)/g, (_, k, v) => params[k] = v);
+        return params;
+      }
+      const params = getParams();
+      // Show blue cube if 2 Player mode selected
+      const playerMode = params.playerMode || 'single';
+      const blueCube = document.getElementById('game-cube-blue');
+      if (playerMode === 'multi') {
+        blueCube.style.display = '';
+        let blueCubeX = Math.floor(window.innerWidth * 0.75), blueCubeY = Math.floor(window.innerHeight / 2);
+        blueCube.style.left = blueCubeX + 'px';
+        blueCube.style.top = blueCubeY + 'px';
+      }
+      // Game options
+      const scoreType = params.scoreType || 'time';
+      const timerLimit = parseInt(params.timer || '60');
+      const countLimit = parseInt(params.count || '5');
+      const mapSize = (params.mapSize || '18x10').split('x').map(Number);
+      const mode = params.mode || 'normal';
+      const targetType = params.targetType || 'fixed';
+      // Game setup
+      const cube = document.getElementById('game-cube');
+      if (mode === 'ghost') {
+        cube.style.opacity = '0';
+      } else {
+        cube.style.opacity = '1';
+      }
+      const rectGrid = document.getElementById('rect-grid');
+      const popup = document.getElementById('popup');
+      const popupX = document.getElementById('popup-x');
+      const popupMessage = document.getElementById('popup-message');
+      const winScreen = document.getElementById('win-screen');
+
+      // Cube state
+  let cubeX = Math.floor(window.innerWidth / 2), cubeY = Math.floor(window.innerHeight / 2);
+  let speed;
+  const cubeSize = 5;
+  let keys = {};
+  let canMove = true;
+  let score = 0;
+  let scoreP1 = 0;
+  let scoreP2 = 0;
+  let timeElapsed = 0;
+  let timerInterval = null;
+
+      // Grid config
+  const gridRows = mapSize[1], gridCols = mapSize[0];
+  // Set speed based on map size
+  if ((gridCols === 18 && gridRows === 10) || (gridCols === 22 && gridRows === 12)) {
+    speed = 1.2; // 20% faster
+  } else if (gridCols < 18 || gridRows < 10) {
+    speed = 2;
+  } else {
+    speed = 1;
+  }
+      let rects = [];
+      let greenIndex = -1;
+      let greenMoveInterval = null;
+
+      // Create grid
+      function createGrid() {
+        rectGrid.innerHTML = '';
+        rects = [];
+        greenIndex = Math.floor(Math.random() * gridRows * gridCols);
+        // Set grid columns/rows dynamically
+        rectGrid.style.gridTemplateColumns = `repeat(${gridCols}, 1fr)`;
+        // Twilight mode: add sun emoji in a random gap
+        if (mode === 'twilight') {
+          // Twilight white circles logic
+          let refCols = 18, refRows = 10, refGap = 30, refBox = 45;
+          let gapPx = refGap, boxPx = refBox;
+          if (gridCols !== refCols || gridRows !== refRows) {
+            let availW = window.innerWidth, availH = window.innerHeight;
+            let totalGapW = (gridCols - 1) * 0.66 * boxPx;
+            let totalBoxW = gridCols * boxPx;
+            let scaleW = availW / (totalBoxW + totalGapW);
+            let totalGapH = (gridRows - 1) * 0.66 * boxPx;
+            let totalBoxH = gridRows * boxPx;
+            let scaleH = availH / (totalBoxH + totalGapH);
+            let scale = Math.min(scaleW, scaleH);
+            boxPx = Math.floor(refBox * scale);
+            gapPx = Math.floor(0.66 * boxPx);
+          }
+          // Function to place a circle at a random gap
+          function placeCircle(circle) {
+            const randCol = Math.floor(Math.random() * (gridCols - 1));
+            const randRow = Math.floor(Math.random() * (gridRows - 1));
+            const left = randCol * (boxPx + gapPx) + boxPx + gapPx/2;
+            const top = randRow * (boxPx + gapPx) + boxPx + gapPx/2;
+            circle.style.left = left + 'px';
+            circle.style.top = top + 'px';
+          }
+          // Create 3 white circles
+          window._twilightCircles = [];
+          window._twilightPlaceCircles = [];
+          for (let i = 0; i < 3; i++) {
+            const circle = document.createElement('div');
+            circle.textContent = '';
+            circle.style.position = 'absolute';
+            circle.style.width = Math.floor(boxPx * 0.4) + 'px';
+            circle.style.height = Math.floor(boxPx * 0.4) + 'px';
+            circle.style.borderRadius = '50%';
+            circle.style.background = '#fdf6e3'; // cream/off-white
+            circle.style.zIndex = 500;
+            circle.style.pointerEvents = 'auto';
+            rectGrid.appendChild(circle);
+            placeCircle(circle);
+            window._twilightCircles.push(circle);
+            window._twilightPlaceCircles.push(() => placeCircle(circle));
+          }
+        }
+        rectGrid.style.gridTemplateRows = `repeat(${gridRows}, 1fr)`;
+        // Calculate box size and gap based on 18x10 reference
+        // Reference: 18 cols, 10 rows, gap: 30px, box size: 45px (gap ≈ 66% of box)
+        let refCols = 18, refRows = 10, refGap = 30, refBox = 45;
+        let gapPx = refGap, boxPx = refBox;
+        // Apply global scale reduction
+        let scaleReduction = 0.975; // 2.5% reduction
+        if (gridCols === 22 && gridRows === 12) {
+          scaleReduction *= 0.975; // further 2.5% reduction for 22x12
+        }
+        if (gridCols !== refCols || gridRows !== refRows) {
+          // Calculate available width/height
+          let availW = window.innerWidth, availH = window.innerHeight;
+          // Maintain ratio: gap = 0.66 * box
+          let totalGapW = (gridCols - 1) * 0.66 * boxPx;
+          let totalBoxW = gridCols * boxPx;
+          let scaleW = availW / (totalBoxW + totalGapW);
+          let totalGapH = (gridRows - 1) * 0.66 * boxPx;
+          let totalBoxH = gridRows * boxPx;
+          let scaleH = availH / (totalBoxH + totalGapH);
+          let scale = Math.min(scaleW, scaleH) * scaleReduction;
+          boxPx = Math.floor(refBox * scale);
+          gapPx = Math.floor(0.66 * boxPx);
+        } else {
+          boxPx = Math.floor(boxPx * scaleReduction);
+          gapPx = Math.floor(gapPx * scaleReduction);
+        }
+        rectGrid.style.gap = gapPx + 'px';
+        for (let r = 0; r < gridRows * gridCols; r++) {
+          const rect = document.createElement('div');
+          rect.className = 'rect';
+          rect.style.width = boxPx + 'px';
+          rect.style.height = boxPx + 'px';
+          // Add color underlay
+          const underlay = document.createElement('div');
+          underlay.className = 'color-underlay';
+          underlay.style.background = '#2196f3'; // blue
+          rect.appendChild(underlay);
+          // Add black overlay
+          const overlay = document.createElement('div');
+          overlay.className = 'black-overlay';
+          // Speed mode: overlays are always transparent
+    if (mode === 'speed') {
+      overlay.style.opacity = '0';
+    } else {
+      overlay.style.opacity = '1';
+    }
+          rect.appendChild(overlay);
+          rect.dataset.color = '0'; // 0 = blue
+          rectGrid.appendChild(rect);
+          rects.push(rect);
+        }
+        updateGreenAndYellowRects();
+        startGreenMovement();
+      }
+
+      // Update green, yellow, orange, and pink rectangles (no diagonals)
+      function updateGreenAndYellowRects() {
+        // Color gradient from red (center/target) to blue (outermost), cycling through orange, yellow, green, blue
+        // Number of in-between colors depends on map size
+        let numLayers = 10; // default for 14x8
+        if (mode !== 'expert') {
+          if (gridCols === 14 && gridRows === 8) numLayers -= 1;
+          if (gridCols === 18 && gridRows === 10) numLayers += 1; // previously +3, now +1
+          if (gridCols === 22 && gridRows === 12) numLayers += 4; // previously +6, now +4
+          if (gridCols === 10 && gridRows === 6) numLayers -= 3;
+        }
+        // Gradient stops: red, orange, yellow, green, blue
+        const stops = [
+          '#f44336', // red
+          '#ff9800', // orange
+          '#ffeb3b', // yellow
+          '#43a047', // green
+          '#2196f3'  // blue
+        ];
+        // Interpolate colors
+        function interpolateColor(c1, c2, t) {
+          // c1/c2: hex strings
+          const hex = x => parseInt(x, 16);
+          const r1 = hex(c1.substr(1,2)), g1 = hex(c1.substr(3,2)), b1 = hex(c1.substr(5,2));
+          const r2 = hex(c2.substr(1,2)), g2 = hex(c2.substr(3,2)), b2 = hex(c2.substr(5,2));
+          const r = Math.round(r1 + (r2 - r1) * t);
+          const g = Math.round(g1 + (g2 - g1) * t);
+          const b = Math.round(b1 + (b2 - b1) * t);
+          return `rgb(${r},${g},${b})`;
+        }
+        let colorGradient = [];
+        for (let i = 0; i < stops.length - 1; i++) {
+          for (let j = 0; j < Math.ceil(numLayers/(stops.length-1)); j++) {
+            let t = j / Math.ceil(numLayers/(stops.length-1));
+            colorGradient.push(interpolateColor(stops[i], stops[i+1], t));
+          }
+        }
+        colorGradient.push(stops[stops.length-1]); // ensure blue at end
+
+        if (mode === 'extreme') {
+          // Fill all with dark gray
+          for (let r = 0; r < rects.length; r++) {
+            rects[r].dataset.color = '0';
+            rects[r].querySelector('.color-underlay').style.background = '#222';
+          }
+          // Target box color
+          rects[greenIndex].dataset.color = String(colorGradient.length-1);
+          rects[greenIndex].querySelector('.color-underlay').style.background = stops[0]; // red
+          // Adjacent boxes (layer 1 only)
+          const row = Math.floor(greenIndex / gridCols);
+          const col = greenIndex % gridCols;
+          const adj = [];
+          if (row > 0) adj.push((row - 1) * gridCols + col);
+          if (row < gridRows - 1) adj.push((row + 1) * gridCols + col);
+          if (col > 0) adj.push(row * gridCols + (col - 1));
+          if (col < gridCols - 1) adj.push(row * gridCols + (col + 1));
+          for (const a of adj) {
+            rects[a].dataset.color = String(colorGradient.length-2);
+            rects[a].querySelector('.color-underlay').style.background = stops[1]; // orange
+          }
+        } else {
+          // Reset all to blue
+          for (let r = 0; r < rects.length; r++) {
+            rects[r].dataset.color = '0';
+            rects[r].querySelector('.color-underlay').style.background = colorGradient[colorGradient.length-1]; // blue
+          }
+          // Set inner (target) as red
+          rects[greenIndex].dataset.color = String(0);
+          rects[greenIndex].querySelector('.color-underlay').style.background = stops[0]; // red
+          // Set layers outwards
+          let layerIndices = new Set([greenIndex]);
+          let visited = new Set([greenIndex]);
+          for (let layer = 1; layer <= numLayers; layer++) {
+            let nextLayer = new Set();
+            for (const idx of layerIndices) {
+              const row = Math.floor(idx / gridCols);
+              const col = idx % gridCols;
+              const adj = [];
+              if (row > 0) adj.push((row - 1) * gridCols + col);
+              if (row < gridRows - 1) adj.push((row + 1) * gridCols + col);
+              if (col > 0) adj.push(row * gridCols + (col - 1));
+              if (col < gridCols - 1) adj.push(row * gridCols + (col + 1));
+              for (const a of adj) {
+                if (!visited.has(a)) {
+                  let colorIdx = Math.min(layer, colorGradient.length-1);
+                  rects[a].dataset.color = String(colorIdx);
+                  rects[a].querySelector('.color-underlay').style.background = colorGradient[colorIdx];
+                  nextLayer.add(a);
+                  visited.add(a);
+                }
+              }
+            }
+            layerIndices = nextLayer;
+          }
+        }
+      }
+
+      // Move green rectangle every 2 seconds
+      let lastGreenIndex = -1;
+      function startGreenMovement() {
+        if (greenMoveInterval) clearInterval(greenMoveInterval);
+        lastGreenIndex = -1;
+        if (targetType === 'moving') {
+          moveGreenRect(); // Move immediately on start
+          greenMoveInterval = setInterval(() => {
+            moveGreenRect();
+          }, 5000);
+        }
+      }
+
+      function moveGreenRect() {
+        // Find current row/col
+        const row = Math.floor(greenIndex / gridCols);
+        const col = greenIndex % gridCols;
+        // Possible moves: up, down, left, right
+        const moves = [];
+        if (row > 0) moves.push(greenIndex - gridCols); // up
+        if (row < gridRows - 1) moves.push(greenIndex + gridCols); // down
+        if (col > 0) moves.push(greenIndex - 1); // left
+        if (col < gridCols - 1) moves.push(greenIndex + 1); // right
+        // Remove last location if present
+        if (lastGreenIndex !== -1) {
+          const idx = moves.indexOf(lastGreenIndex);
+          if (idx !== -1) moves.splice(idx, 1);
+        }
+        // Pick a random adjacent
+        if (moves.length === 0) return; // No move possible
+        const nextIndex = moves[Math.floor(Math.random() * moves.length)];
+        greenIndex = nextIndex;
+        updateGreenAndYellowRects();
+        lastGreenIndex = greenIndex;
+      }
+
+      // Responsive grid
+      window.addEventListener('resize', () => {
+        createGrid();
+        setCubePos(cubeX, cubeY);
+      });
+
+      // Position cube
+      function setCubePos(x, y) {
+        cube.style.left = x + 'px';
+        cube.style.top = y + 'px';
+      }
+
+      // Get rect for cube
+      function getCubeRect(x = cubeX, y = cubeY) {
+        return {left: x, top: y, right: x + cubeSize, bottom: y + cubeSize};
+      }
+
+      // Get rect for element
+      function getRect(el) {
+        const r = el.getBoundingClientRect();
+        return {left: r.left, top: r.top, right: r.right, bottom: r.bottom};
+      }
+
+      // Collision check
+      function rectsOverlap(a, b) {
+        return !(a.right < b.left || a.left > b.right || a.bottom < b.top || a.top > b.bottom);
+      }
+
+      // Move cube
+      function moveCube(dx, dy) {
+        if (!canMove) return;
+        let nx = cubeX + dx, ny = cubeY + dy;
+        // Clamp to screen
+        nx = Math.max(0, Math.min(window.innerWidth - cubeSize, nx));
+        ny = Math.max(0, Math.min(window.innerHeight - cubeSize, ny));
+        // Predict collision
+        const cubeRect = getCubeRect(nx, ny);
+        let blocked = false;
+        for (let i = 0; i < rects.length; i++) {
+          const rect = rects[i];
+          if (rectsOverlap(cubeRect, getRect(rect))) {
+            blocked = true;
+            rect.classList.add('bounce');
+            let overlay = rect.querySelector('.black-overlay');
+            overlay.style.opacity = '0';
+            rect.classList.add('bounce');
+            if (rect.dataset.color === '11') {
+              // Stop green movement
+              if (greenMoveInterval) {
+                clearInterval(greenMoveInterval);
+                greenMoveInterval = null;
+              }
+            }
+            setTimeout(() => {
+              if (mode !== 'speed') {
+                overlay.style.opacity = '1';
+              } // In speed mode, keep overlay transparent
+              rect.classList.remove('bounce');
+            }, 300);
+            break;
+          }
+        }
+        if (!blocked) {
+          cubeX = nx; cubeY = ny;
+          setCubePos(cubeX, cubeY);
+        }
+      }
+
+      // Show popup
+      // Popup removed; replaced by color flash effect
+
+      // Keyboard controls
+      window.addEventListener('keydown', e => {
+        keys[e.key.toLowerCase()] = true;
+      });
+      window.addEventListener('keyup', e => {
+        keys[e.key.toLowerCase()] = false;
+      });
+
+      // Game loop
+      function gameLoop() {
+        let dx = 0, dy = 0;
+        let blueDx = 0, blueDy = 0;
+        if (playerMode === 'multi') {
+          // Only WASD for red player box
+          if (keys['a']) dx -= speed;
+          if (keys['d']) dx += speed;
+          if (keys['w']) dy -= speed;
+          if (keys['s']) dy += speed;
+          // Only arrow keys for blue player box
+          if (keys['arrowleft']) blueDx -= speed;
+          if (keys['arrowright']) blueDx += speed;
+          if (keys['arrowup']) blueDy -= speed;
+          if (keys['arrowdown']) blueDy += speed;
+        } else {
+          // Single player: WASD or arrow keys
+          if (keys['arrowleft'] || keys['a']) dx -= speed;
+          if (keys['arrowright'] || keys['d']) dx += speed;
+          if (keys['arrowup'] || keys['w']) dy -= speed;
+          if (keys['arrowdown'] || keys['s']) dy += speed;
+        }
+        if (dx !== 0 || dy !== 0) moveCube(dx, dy);
+        if (playerMode === 'multi' && (blueDx !== 0 || blueDy !== 0)) {
+          // Move blue player box and handle collisions/scoring
+          let nx = parseInt(blueCube.style.left || 0) + blueDx;
+          let ny = parseInt(blueCube.style.top || 0) + blueDy;
+          nx = Math.max(0, Math.min(window.innerWidth - cubeSize, nx));
+          ny = Math.max(0, Math.min(window.innerHeight - cubeSize, ny));
+          // Predict collision
+          function getBlueCubeRect(x = nx, y = ny) {
+            return {left: x, top: y, right: x + cubeSize, bottom: y + cubeSize};
+          }
+          const blueCubeRect = getBlueCubeRect(nx, ny);
+          let blocked = false;
+          // Only check the true red box (greenIndex)
+          const redRect = rects[greenIndex];
+          if (rectsOverlap(blueCubeRect, getRect(redRect))) {
+              blocked = true;
+              if (!redRect.classList.contains('scored-blue')) {
+                redRect.classList.add('scored-blue');
+                redRect.classList.add('bounce');
+                let overlay = redRect.querySelector('.black-overlay');
+                overlay.style.opacity = '0';
+                redRect.classList.add('bounce');
+                // Hit red box
+                scoreP2++;
+                updateScoreTimer();
+                // Show found popup above the red box
+                const popup = document.getElementById('found-popup');
+                const redRectBox = redRect.getBoundingClientRect();
+                popup.style.display = 'block';
+                popup.style.opacity = '1';
+                popup.style.transform = 'translateY(0)';
+                // Center popup vertically and horizontally to the red box
+                popup.style.left = (redRectBox.left + redRectBox.width/2 - 30) + 'px';
+                popup.style.top = (redRectBox.top + redRectBox.height/2 - 16) + 'px';
+                setTimeout(() => {
+                  popup.style.opacity = '0';
+                  popup.style.transform = 'translateY(-50px)';
+                  setTimeout(() => { popup.style.display = 'none'; popup.style.transform = 'translateY(0)'; }, 400);
+                }, 200);
+                // Add delay before moving red box and changing color
+                setTimeout(() => {
+                  let newIdx;
+                  do {
+                    newIdx = Math.floor(Math.random() * rects.length);
+                  } while (newIdx === greenIndex || rectsOverlap(blueCubeRect, getRect(rects[newIdx])));
+                  greenIndex = newIdx;
+                  updateGreenAndYellowRects();
+                  lastGreenIndex = greenIndex;
+                  // In Speed mode, keep overlay transparent after move
+                  if (mode === 'speed') {
+                    overlay.style.opacity = '0';
+                  } else {
+                    overlay.style.opacity = '1';
+                  }
+                  redRect.classList.remove('bounce');
+                  redRect.classList.remove('scored-blue');
+                }, 500);
+              }
+          } else {
+            // Check all other rects for bounce only
+            for (let i = 0; i < rects.length; i++) {
+              if (i === greenIndex) continue;
+              const rect = rects[i];
+              if (rectsOverlap(blueCubeRect, getRect(rect))) {
+                blocked = true;
+                rect.classList.add('bounce');
+                let overlay = rect.querySelector('.black-overlay');
+                if (mode === 'speed') {
+                  overlay.style.opacity = '0';
+                  setTimeout(() => {
+                    rect.classList.remove('bounce');
+                  }, 300);
+                } else if (mode !== 'noob') {
+                  overlay.style.opacity = '0';
+                  setTimeout(() => {
+                    overlay.style.opacity = '1';
+                    rect.classList.remove('bounce');
+                  }, 300);
+                } else {
+                  overlay.style.opacity = '0';
+                  setTimeout(() => {
+                    rect.classList.remove('bounce');
+                  }, 300);
+                }
+                break;
+              }
+            }
+          }
+          if (!blocked) {
+            blueCube.style.left = nx + 'px';
+            blueCube.style.top = ny + 'px';
+          }
+        }
+        // Twilight mode: check collision with each white circle for blue box
+        if (mode === 'twilight' && window._twilightCircles && playerMode === 'multi') {
+          const blueCubeRect = blueCube.getBoundingClientRect();
+          for (let i = 0; i < window._twilightCircles.length; i++) {
+            const circle = window._twilightCircles[i];
+            const circleRect = circle.getBoundingClientRect();
+            if (
+              blueCubeRect.left < circleRect.right &&
+              blueCubeRect.right > circleRect.left &&
+              blueCubeRect.top < circleRect.bottom &&
+              blueCubeRect.bottom > circleRect.top
+            ) {
+              // Teleport this circle to a new location
+              if (window._twilightPlaceCircles[i]) window._twilightPlaceCircles[i]();
+              // Fade blue player box opacity from 1 to 0 over 10 seconds
+              if (!window._twilightFadeActiveBlue) {
+                window._twilightFadeActiveBlue = true;
+                let fadeStart = Date.now();
+                blueCube.style.opacity = '1';
+                if (window._twilightFadeIntervalBlue) clearInterval(window._twilightFadeIntervalBlue);
+                window._twilightFadeIntervalBlue = setInterval(() => {
+                  let elapsed = (Date.now() - fadeStart) / 10000;
+                  if (elapsed >= 1) {
+                    blueCube.style.opacity = '0';
+                    clearInterval(window._twilightFadeIntervalBlue);
+                    window._twilightFadeActiveBlue = false;
+                  } else {
+                    blueCube.style.opacity = String(1 - elapsed);
+                  }
+                }, 50);
+              } else {
+                // If already fading, reset to full opacity and restart fade
+                blueCube.style.opacity = '1';
+                let fadeStart = Date.now();
+                if (window._twilightFadeIntervalBlue) clearInterval(window._twilightFadeIntervalBlue);
+                window._twilightFadeIntervalBlue = setInterval(() => {
+                  let elapsed = (Date.now() - fadeStart) / 10000;
+                  if (elapsed >= 1) {
+                    blueCube.style.opacity = '0';
+                    clearInterval(window._twilightFadeIntervalBlue);
+                    window._twilightFadeActiveBlue = false;
+                  } else {
+                    blueCube.style.opacity = String(1 - elapsed);
+                  }
+                }, 50);
+              }
+              break; // Only trigger for one circle per frame
+            }
+          }
+        }
+          // Twilight mode: check collision with each white circle for red box
+          if (mode === 'twilight' && window._twilightCircles) {
+            const cubeRect = cube.getBoundingClientRect();
+            for (let i = 0; i < window._twilightCircles.length; i++) {
+              const circle = window._twilightCircles[i];
+              const circleRect = circle.getBoundingClientRect();
+              if (
+                cubeRect.left < circleRect.right &&
+                cubeRect.right > circleRect.left &&
+                cubeRect.top < circleRect.bottom &&
+                cubeRect.bottom > circleRect.top
+              ) {
+                // Teleport this circle to a new location
+                if (window._twilightPlaceCircles[i]) window._twilightPlaceCircles[i]();
+                // Fade player box opacity from 1 to 0 over 10 seconds
+                if (!window._twilightFadeActive) {
+                  window._twilightFadeActive = true;
+                  let fadeStart = Date.now();
+                  cube.style.opacity = '1';
+                  if (window._twilightFadeInterval) clearInterval(window._twilightFadeInterval);
+                  window._twilightFadeInterval = setInterval(() => {
+                    let elapsed = (Date.now() - fadeStart) / 10000;
+                    if (elapsed >= 1) {
+                      cube.style.opacity = '0';
+                      clearInterval(window._twilightFadeInterval);
+                      window._twilightFadeActive = false;
+                    } else {
+                      cube.style.opacity = String(1 - elapsed);
+                    }
+                  }, 50);
+                } else {
+                  // If already fading, reset to full opacity and restart fade
+                  cube.style.opacity = '1';
+                  let fadeStart = Date.now();
+                  if (window._twilightFadeInterval) clearInterval(window._twilightFadeInterval);
+                  window._twilightFadeInterval = setInterval(() => {
+                    let elapsed = (Date.now() - fadeStart) / 10000;
+                    if (elapsed >= 1) {
+                      cube.style.opacity = '0';
+                      clearInterval(window._twilightFadeInterval);
+                      window._twilightFadeActive = false;
+                    } else {
+                      cube.style.opacity = String(1 - elapsed);
+                    }
+                  }, 50);
+                }
+                break; // Only trigger for one circle per frame
+              }
+            }
+          }
+        requestAnimationFrame(gameLoop);
+      }
+
+      // Start
+      createGrid();
+      setCubePos(cubeX, cubeY);
+      // Twilight mode: start fade immediately
+      if (mode === 'twilight') {
+        cube.style.opacity = '1';
+        let fadeStart = Date.now();
+        if (window._twilightFadeInterval) clearInterval(window._twilightFadeInterval);
+        window._twilightFadeActive = true;
+        window._twilightFadeInterval = setInterval(() => {
+          let elapsed = (Date.now() - fadeStart) / 10000;
+          if (elapsed >= 1) {
+            cube.style.opacity = '0';
+            clearInterval(window._twilightFadeInterval);
+            window._twilightFadeActive = false;
+          } else {
+            cube.style.opacity = String(1 - elapsed);
+          }
+        }, 50);
+      }
+      // Timer/Count display
+      function updateScoreTimer() {
+        const p2Label = document.getElementById('score-label-p2');
+        if (playerMode === 'multi') {
+          document.getElementById('score-p1').textContent = scoreP1;
+          document.getElementById('score-p2').textContent = scoreP2;
+          p2Label.style.visibility = '';
+        } else {
+          document.getElementById('score-p1').textContent = score;
+          document.getElementById('score-p2').textContent = '';
+          p2Label.style.visibility = 'hidden';
+        }
+        const timerElem = document.getElementById('timer');
+        if (scoreType === 'time') {
+          let min = Math.floor(timeElapsed / 60);
+          let sec = timeElapsed % 60;
+          timerElem.textContent = `${min}:${sec.toString().padStart(2, '0')}`;
+        } else {
+          document.getElementById('timer-label').textContent = `Time: ${Math.floor(timeElapsed/60)}:${(timeElapsed%60).toString().padStart(2,'0')}`;
+        }
+        // Timer flash logic
+        if (scoreType === 'time') {
+          const timeLeft = timerLimit - timeElapsed;
+          if (timeLeft === 10 && !timerElem.classList.contains('flash-red-10')) {
+            timerElem.classList.add('flash-red-10');
+            timerElem.style.transition = 'color 0.2s';
+            timerElem.style.color = '#f44336';
+            setTimeout(() => {
+              timerElem.style.color = '';
+              timerElem.classList.remove('flash-red-10');
+            }, 400);
+          }
+          if (timeLeft <= 5 && timeLeft > 0) {
+            if (!timerElem.classList.contains('flash-red-5')) {
+              timerElem.classList.add('flash-red-5');
+            }
+            timerElem.style.transition = 'color 0.2s';
+            timerElem.style.color = '#f44336';
+            setTimeout(() => {
+              timerElem.style.color = '';
+            }, 400);
+            // Remove flash-red-5 after last flash
+            if (timeLeft === 1) {
+              setTimeout(() => {
+                timerElem.classList.remove('flash-red-5');
+              }, 500);
+            }
+          }
+        }
+      }
+      updateScoreTimer();
+      if (scoreType === 'time') {
+        timerInterval = setInterval(() => {
+          timeElapsed++;
+          updateScoreTimer();
+          if (timeElapsed >= timerLimit) {
+            showFinishedScreen(`Time's up! Your score: ${score}`);
+          }
+        }, 1000);
+      } else {
+        timerInterval = setInterval(() => {
+          timeElapsed++;
+          updateScoreTimer();
+        }, 1000);
+      }
+      // Override moveCube to handle scoring
+      const origMoveCube = moveCube;
+      moveCube = function(dx, dy) {
+        if (!canMove) return;
+        let nx = cubeX + dx, ny = cubeY + dy;
+        nx = Math.max(0, Math.min(window.innerWidth - cubeSize, nx));
+        ny = Math.max(0, Math.min(window.innerHeight - cubeSize, ny));
+        const cubeRect = getCubeRect(nx, ny);
+        let blocked = false;
+        // Only check the true red box (greenIndex)
+        const redRect = rects[greenIndex];
+        if (rectsOverlap(cubeRect, getRect(redRect))) {
+            blocked = true;
+            if (!redRect.classList.contains('scored')) {
+              redRect.classList.add('scored');
+              redRect.classList.add('bounce');
+              let overlay = redRect.querySelector('.black-overlay');
+              // Always transparent in speed mode
+              if (mode === 'speed') {
+                overlay.style.opacity = '0';
+              } else {
+                overlay.style.opacity = '1';
+              }
+              redRect.classList.add('bounce');
+              // Hit red box
+              if (playerMode === 'multi') {
+                scoreP1++;
+              } else {
+                score++;
+              }
+              updateScoreTimer();
+              // Show found popup above the red box
+              const popup = document.getElementById('found-popup');
+              const redRectBox = redRect.getBoundingClientRect();
+              popup.style.display = 'block';
+              popup.style.opacity = '1';
+              popup.style.transform = 'translateY(0)';
+              // Center popup vertically and horizontally to the red box
+              popup.style.left = (redRectBox.left + redRectBox.width/2 - 30) + 'px';
+              popup.style.top = (redRectBox.top + redRectBox.height/2 - 16) + 'px';
+              setTimeout(() => {
+                popup.style.opacity = '0';
+                popup.style.transform = 'translateY(-50px)';
+                setTimeout(() => { popup.style.display = 'none'; popup.style.transform = 'translateY(0)'; }, 400);
+              }, 200);
+              if (scoreType === 'count' && score >= countLimit) {
+                showFinishedScreen(`You reached ${countLimit} points in ${Math.floor(timeElapsed/60)}:${(timeElapsed%60).toString().padStart(2,'0')}`);
+                return;
+              }
+              // Add delay before moving red box and changing color
+              setTimeout(() => {
+                let newIdx;
+                do {
+                  newIdx = Math.floor(Math.random() * rects.length);
+                } while (newIdx === greenIndex || rectsOverlap(cubeRect, getRect(rects[newIdx])));
+                greenIndex = newIdx;
+                updateGreenAndYellowRects();
+                lastGreenIndex = greenIndex;
+                // Always transparent in speed mode
+                if (mode === 'speed') {
+                  overlay.style.opacity = '0';
+                } else {
+                  overlay.style.opacity = '1';
+                }
+                redRect.classList.remove('bounce');
+                redRect.classList.remove('scored');
+              }, 500);
+            }
+        } else {
+          // Check all other rects for bounce only
+          for (let i = 0; i < rects.length; i++) {
+            if (i === greenIndex) continue;
+            const rect = rects[i];
+            if (rectsOverlap(cubeRect, getRect(rect))) {
+              blocked = true;
+              rect.classList.add('bounce');
+              let overlay = rect.querySelector('.black-overlay');
+              // Always transparent in speed mode
+              if (mode === 'speed') {
+                overlay.style.opacity = '0';
+                setTimeout(() => {
+                  rect.classList.remove('bounce');
+                }, 300);
+              } else {
+                overlay.style.opacity = '0';
+                setTimeout(() => {
+                  overlay.style.opacity = '1';
+                  rect.classList.remove('bounce');
+                }, 300);
+              }
+              break;
+            }
+          }
+        }
+        if (!blocked) {
+          cubeX = nx; cubeY = ny;
+          setCubePos(cubeX, cubeY);
+        }
+      };
+      gameLoop();
+    </script>
+  </body>
+</html>

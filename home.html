@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+    <title>Hot or Cold</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+/* Category labels */
+.menu-section .category-label {
+  font-size: 20px;
+  font-family: 'Quicksand', Arial, sans-serif;
+}
+/* Option labels */
+.menu-section .option-label {
+  font-size: 16px;
+  font-family: 'Quicksand', Arial, sans-serif;
+}
+    /* Modern rounded dropdown style */
+    .menu-section select {
+  background: #222;
+  color: #fff;
+  border: 1.5px solid #444;
+  border-radius: 10px;
+  padding: 3px 18px 3px 8px;
+  font-size: 0.82rem;
+  font-family: 'Quicksand', Arial, sans-serif;
+  box-shadow: none;
+  appearance: none;
+  outline: none;
+  transition: border 0.2s, box-shadow 0.2s;
+  cursor: pointer;
+  min-width: 80px;
+  margin-bottom: 4px;
+  position: relative;
+    }
+    .menu-section select:focus, .menu-section select:hover {
+      border-color: #2196f3;
+  box-shadow: none;
+    }
+    /* Custom dropdown arrow */
+    .menu-section select {
+      background-image: url('data:image/svg+xml;utf8,<svg fill="%23fff" height="18" viewBox="0 0 24 24" width="18" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      background-size: 18px 18px;
+    }
+    .help-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #444;
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 500;
+  margin-left: 8px;
+  cursor: pointer;
+  border: 1px solid #666;
+  position: relative;
+  transition: background 0.2s;
+    }
+    .help-btn:hover {
+      background: #2196f3;
+      color: #fff;
+    }
+    .help-tooltip {
+      display: none;
+      position: absolute;
+      left: 50%;
+      top: 110%;
+      transform: translateX(-50%);
+      background: #222;
+      color: #fff;
+      padding: 8px 16px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px #000a;
+  font-size: 1rem;
+  font-weight: normal;
+  white-space: normal;
+  z-index: 5000;
+  max-width: calc(100vw - 10px);
+  min-width: 400px;
+  width: 100%;
+  box-sizing: border-box;
+    }
+    .help-btn:hover .help-tooltip {
+      display: block;
+    }
+    body {
+      background: #222;
+      color: #fff;
+  font-family: 'Quicksand', Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    h1 {
+  font-size: 2.5rem;
+  margin-bottom: 32px;
+  margin-top: calc(-5vh);
+  color: #f44336;
+  text-shadow: 0 2px 8px #000a;
+    }
+    .menu-section {
+      background: #333;
+      border-radius: 16px;
+      box-shadow: 0 2px 16px #000a;
+  padding: 28.8px 43.2px;
+      margin-bottom: 32px;
+      min-width: 320px;
+    }
+    .menu-section label {
+  font-size: 20px;
+  font-family: 'Quicksand', Arial, sans-serif;
+      margin-right: 12px;
+    }
+    .menu-section select, .menu-section input[type=radio] {
+  font-size: 16px;
+  font-family: 'Quicksand', Arial, sans-serif;
+      margin: 0 8px 0 0;
+    }
+    .menu-section .mode-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    .mode-list label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 16px;
+    }
+    .mode-label-normal, .mode-label-speed {
+      color: #8cff8c;
+    }
+    .mode-label-twilight {
+      color: #fff9a6;
+    }
+    .mode-label-ghost {
+      color: #ffb347;
+    }
+    .mode-label-extreme {
+      color: #ff4c4c;
+    }
+    .mode-icon-normal, .mode-icon-speed {
+        filter: brightness(0) saturate(100%) invert(81%) sepia(13%) saturate(749%) hue-rotate(66deg) brightness(104%) contrast(101%);
+    }
+    .mode-icon-twilight {
+         filter: brightness(0) saturate(100%) invert(98%) sepia(11%) saturate(1167%) hue-rotate(1deg) brightness(104%) contrast(101%);
+    }
+    .mode-icon-ghost {
+        filter: brightness(0) saturate(100%) invert(56%) sepia(99%) saturate(747%) hue-rotate(-7deg) brightness(104%) contrast(101%);
+    }
+    .mode-icon-extreme {
+        filter: brightness(0) saturate(100%) invert(34%) sepia(98%) saturate(1800%) hue-rotate(-15deg) brightness(80%) contrast(110%);
+    }
+    .mode-icon {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+  border-radius: 6px;
+  background: none;
+  box-shadow: none;
+  margin-right: 2px;
+    }
+    .menu-section .player-mode-list {
+      display: flex;
+      flex-direction: row;
+      gap: 24px;
+      margin-top: 12px;
+    }
+    .start-btn {
+  background: #222c;
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.5);
+  border-radius: 50px;
+  font-size: 2rem;
+  font-weight: 600;
+  font-family: 'Quicksand', Arial, sans-serif;
+  padding: 8px 10px;
+  width: 100%;
+  min-width: 320px;
+  max-width: 600px;
+  margin-top: 24px;
+  cursor: pointer;
+  box-shadow: 0 2px 8px #000a;
+  transition: background 0.2s, box-shadow 0.2s;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+    }
+    .start-btn:hover {
+      background: #d32f2f;
+    }
+  </style>
+</head>
+<body>
+  <!-- WASD Keys bottom left overlay group -->
+  <div style="position:fixed;left:24px;bottom:24px;width:400px;height:120px;z-index:3000;pointer-events:none;">
+    <img src="assets/WASD Keys.png" alt="WASD Keys" style="position:absolute;left:0;bottom:0;width:400px;height:auto;opacity:0.92;" id="wasd-img-base">
+    <img src="assets/Direction Visuals/WASD Keys W.png" style="position:absolute;left:0;bottom:0;width:400px;height:auto;opacity:0.92;display:none;" id="wasd-img-w">
+    <img src="assets/Direction Visuals/WASD Keys A.png" style="position:absolute;left:0;bottom:0;width:400px;height:auto;opacity:0.92;display:none;" id="wasd-img-a">
+    <img src="assets/Direction Visuals/WASD Keys S.png" style="position:absolute;left:0;bottom:0;width:400px;height:auto;opacity:0.92;display:none;" id="wasd-img-s">
+    <img src="assets/Direction Visuals/WASD Keys D.png" style="position:absolute;left:0;bottom:0;width:400px;height:auto;opacity:0.92;display:none;" id="wasd-img-d">
+  </div>
+  <!-- Arrow Keys bottom right overlay group -->
+  <div style="position:fixed;right:24px;bottom:24px;width:400px;height:120px;z-index:3000;pointer-events:none;">
+    <img src="assets/Arrow Keys.png" alt="Arrow Keys" style="position:absolute;right:0;bottom:0;width:400px;height:auto;opacity:0.92;" id="arrow-img-base">
+    <img src="assets/Direction Visuals/Arrow Keys Up.png" style="position:absolute;right:0;bottom:0;width:400px;height:auto;opacity:0.92;display:none;" id="arrow-img-up">
+    <img src="assets/Direction Visuals/Arrow Keys Left.png" style="position:absolute;right:0;bottom:0;width:400px;height:auto;opacity:0.92;display:none;" id="arrow-img-left">
+    <img src="assets/Direction Visuals/Arrow Keys Down.png" style="position:absolute;right:0;bottom:0;width:400px;height:auto;opacity:0.92;display:none;" id="arrow-img-down">
+    <img src="assets/Direction Visuals/Arrow Keys Right.png" style="position:absolute;right:0;bottom:0;width:400px;height:auto;opacity:0.92;display:none;" id="arrow-img-right">
+  </div>
+  <h1>
+    <span style="color:#f44336">Hot</span>
+    <span style="color:#fff"> or </span>
+    <span style="color:#2196f3">Cold</span>
+  </h1>
+  <div id="home-cube-red" style="position:fixed;left:calc(50vw - 10vw);top:10vh;width:10px;height:10px;background:#e53935;border-radius:3px;box-shadow:0 2px 8px rgba(0,0,0,0.2);z-index:2000;transition:box-shadow 0.2s;"></div>
+  <div id="home-cube-blue" style="position:fixed;left:calc(50vw + 10vw);top:10vh;width:10px;height:10px;background:#2196f3;border-radius:3px;box-shadow:0 2px 8px rgba(0,0,0,0.2);z-index:2000;transition:box-shadow 0.2s;"></div>
+  <form id="game-menu">
+  <div class="menu-section">
+      <div style="display:flex;align-items:center;gap:4px;">
+        <label class="category-label">Scoring Mode:</label>
+        <span class="help-btn">?
+          <span class="help-tooltip">
+            <b>Time:</b> Score as many points as you can before time runs out.
+            <br><b>Count:</b> Singleplayer mode (aim to get the a quick time) or 2-player mode (first to reach the count wins).
+          </span>
+        </span>
+      </div>
+  <label class="option-label"><input type="radio" name="scoreType" value="time" checked> Time:</label>
+      <select name="timer">
+        <option value="60">1 min</option>
+        <option value="120">2 min</option>
+        <option value="180">3 min</option>
+      </select>
+  <label class="option-label"><input type="radio" name="scoreType" value="count"> Count:</label>
+      <select name="count">
+        <option value="3">3</option>
+        <option value="5">5</option>
+        <option value="10">10</option>
+      </select>
+      <br><br>
+      <div style="display:flex;align-items:center;gap:4px;">
+        <label class="category-label">Map Size:</label>
+      </div>
+      <select name="mapSize">
+        <option value="10x6">10 x 6 units</option>
+        <option value="14x8">14 x 8 units</option>
+        <option value="18x10">18 x 10 units</option>
+        <option value="22x12">22 x 12 units</option>
+      </select>
+      <br><br>
+      <div style="display:flex;align-items:center;gap:4px;">
+        <label class="category-label">Player Mode:</label>
+      </div>
+      <div class="player-mode-list">
+        <label class="option-label"><input type="radio" name="playerMode" value="single" checked> Single Player</label>
+        <label class="option-label"><input type="radio" name="playerMode" value="multi"> 2 Player</label>
+      </div>
+      <br>
+      <div style="display:flex;align-items:center;gap:4px;">
+        <label class="category-label">Game Mode:</label>
+        <span class="help-btn">?
+          <span class="help-tooltip">
+            <b>Normal mode: </b>Find the hidden target based on the colour cues. blue=cold=far... red=hot=close
+            <br><b>Speed mode: </b> The target isn't hidden
+            <br><b>Twilight mode:</b> You will lose sight overtime if you don't restock on light sources
+            <br><b>Ghost mode:</b> You have no vision
+            <br><b>Extreme mode:</b> The colour detection radius has been reduced to 1
+        
+        
+            </span>
+        </span>
+      </div>
+    <div class="mode-list">
+  <label class="option-label"><input type="radio" name="mode" value="normal" checked> <img src="assets/normal.png" class="mode-icon mode-icon-normal" alt="Normal"> <span class="mode-label-normal">Normal</span></label>
+  <label class="option-label"><input type="radio" name="mode" value="speed"> <img src="assets/speed.png" class="mode-icon mode-icon-speed" alt="Speed"> <span class="mode-label-speed">Speed</span></label>
+  <label class="option-label"><input type="radio" name="mode" value="twilight"> <img src="assets/twilight.png" class="mode-icon mode-icon-twilight" alt="Twilight"> <span class="mode-label-twilight">Twilight</span></label>
+  <label class="option-label"><input type="radio" name="mode" value="ghost"> <img src="assets/ghost.png" class="mode-icon mode-icon-ghost" alt="Ghost"> <span class="mode-label-ghost">Ghost</span></label>
+  <label class="option-label"><input type="radio" name="mode" value="extreme"> <img src="assets/extreme.png" class="mode-icon mode-icon-extreme" alt="Extreme"> <span class="mode-label-extreme">Extreme</span></label>
+      </div>
+      <br>
+      <div style="display:flex;align-items:center;gap:4px;">
+        <label class="category-label">Target Type:</label>
+        <span class="help-btn">?
+          <span class="help-tooltip"><b>Stationary:</b> Target doesn't move<br><b>Moving:</b> Target moves 1 unit every 5 seconds</span>
+        </span>
+      </div>
+  <label class="option-label"><input type="radio" name="targetType" value="stationary" checked> Stationary</label>
+  <label class="option-label"><input type="radio" name="targetType" value="moving"> Moving</label>
+    </div>
+    <button type="submit" class="start-btn">Start Game</button>
+  </form>
+  <script>
+    // Overlay logic for direction images
+    const wasdImgs = {
+      'w': document.getElementById('wasd-img-w'),
+      'a': document.getElementById('wasd-img-a'),
+      's': document.getElementById('wasd-img-s'),
+      'd': document.getElementById('wasd-img-d')
+    };
+    const arrowImgs = {
+      'arrowup': document.getElementById('arrow-img-up'),
+      'arrowleft': document.getElementById('arrow-img-left'),
+      'arrowdown': document.getElementById('arrow-img-down'),
+      'arrowright': document.getElementById('arrow-img-right')
+    };
+    function updateKeyImagesOverlay() {
+      // WASD overlays
+      for (const k of ['w','a','s','d']) {
+        wasdImgs[k].style.display = keys[k] ? '' : 'none';
+      }
+      // Arrow overlays
+      for (const k of ['arrowup','arrowleft','arrowdown','arrowright']) {
+        arrowImgs[k].style.display = keys[k] ? '' : 'none';
+      }
+    }
+    // Directional key image switching logic
+    const wasdImg = document.getElementById('wasd-img');
+    const arrowImg = document.getElementById('arrow-img');
+    const wasdVisuals = {
+      'w': 'assets/Direction Visuals/WASD Keys W.png',
+      'a': 'assets/Direction Visuals/WASD Keys A.png',
+      's': 'assets/Direction Visuals/WASD Keys S.png',
+      'd': 'assets/Direction Visuals/WASD Keys D.png',
+      'default': 'assets/WASD Keys.png'
+    };
+    const arrowVisuals = {
+      'arrowup': 'assets/Direction Visuals/Arrow Keys Up.png',
+      'arrowleft': 'assets/Direction Visuals/Arrow Keys Left.png',
+      'arrowdown': 'assets/Direction Visuals/Arrow Keys Down.png',
+      'arrowright': 'assets/Direction Visuals/Arrow Keys Right.png',
+      'default': 'assets/Arrow Keys.png'
+    };
+    function updateKeyImages() {
+      // WASD
+      if (keys['w']) wasdImg.src = wasdVisuals['w'];
+      else if (keys['a']) wasdImg.src = wasdVisuals['a'];
+      else if (keys['s']) wasdImg.src = wasdVisuals['s'];
+      else if (keys['d']) wasdImg.src = wasdVisuals['d'];
+      else wasdImg.src = wasdVisuals['default'];
+      // Arrow keys
+      if (keys['arrowup']) arrowImg.src = arrowVisuals['arrowup'];
+      else if (keys['arrowleft']) arrowImg.src = arrowVisuals['arrowleft'];
+      else if (keys['arrowdown']) arrowImg.src = arrowVisuals['arrowdown'];
+      else if (keys['arrowright']) arrowImg.src = arrowVisuals['arrowright'];
+      else arrowImg.src = arrowVisuals['default'];
+    }
+    // Cube movement logic for home menu
+    let homeCubeRed = document.getElementById('home-cube-red');
+    let homeCubeBlue = document.getElementById('home-cube-blue');
+    let redX = window.innerWidth * 0.5 - window.innerWidth * 0.10, redY = window.innerHeight * 0.10;
+    let blueX = window.innerWidth * 0.5 + window.innerWidth * 0.10, blueY = window.innerHeight * 0.10;
+    // On resize, keep cubes at 10vh and 10vw from center
+    window.addEventListener('resize', () => {
+      redX = window.innerWidth * 0.5 - window.innerWidth * 0.10;
+      blueX = window.innerWidth * 0.5 + window.innerWidth * 0.10;
+      redY = window.innerHeight * 0.10;
+      blueY = window.innerHeight * 0.10;
+      setHomeCubePos();
+    });
+    // On resize, keep cubes at 25vh
+    window.addEventListener('resize', () => {
+      redY = window.innerHeight * 0.25;
+      blueY = window.innerHeight * 0.25;
+      blueX = window.innerWidth - 80;
+      setHomeCubePos();
+    });
+  const cubeSize = 10, moveStep = 2;
+    function setHomeCubePos() {
+      homeCubeRed.style.left = redX + 'px';
+      homeCubeRed.style.top = redY + 'px';
+      homeCubeBlue.style.left = blueX + 'px';
+      homeCubeBlue.style.top = blueY + 'px';
+    }
+    setHomeCubePos();
+    window.addEventListener('resize', () => {
+      // Keep cubes at bottom corners
+      redY = window.innerHeight - 120;
+      blueY = window.innerHeight - 120;
+      blueX = window.innerWidth - 80;
+      setHomeCubePos();
+    });
+    let keys = {};
+    window.addEventListener('keydown', e => { keys[e.key.toLowerCase()] = true; });
+    window.addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; });
+    function rectsCollide(r1, r2) {
+      return !(r2.left > r1.right || r2.right < r1.left || r2.top > r1.bottom || r2.bottom < r1.top);
+    }
+    function getCubeRect(x, y) {
+      return {left: x, right: x + cubeSize, top: y, bottom: y + cubeSize};
+    }
+    function getElementRects(selectors) {
+      return selectors.map(sel => {
+        const el = document.querySelector(sel);
+        if (!el) return null;
+        const rect = el.getBoundingClientRect();
+        return {left: rect.left, right: rect.right, top: rect.top, bottom: rect.bottom};
+      }).filter(Boolean);
+    }
+    function canMoveCube(x, y, dx, dy, otherCubeRect, blockRects) {
+      const nextRect = getCubeRect(x + dx, y + dy);
+      // Check collision with other cube
+      if (rectsCollide(nextRect, otherCubeRect)) return false;
+      // Check collision with blocks
+      for (const r of blockRects) if (rectsCollide(nextRect, r)) return false;
+      return true;
+    }
+    function homeCubeLoop() {
+  // Get blocking elements: menu box, h1, start button
+  const blockRects = getElementRects(['.menu-section', 'h1', '.start-btn']);
+      // Red cube: WASD
+      let redRect = getCubeRect(redX, redY);
+      let blueRect = getCubeRect(blueX, blueY);
+      if (keys['a'] && canMoveCube(redX, redY, -moveStep, 0, blueRect, blockRects)) redX = Math.max(0, redX - moveStep);
+      if (keys['d'] && canMoveCube(redX, redY, moveStep, 0, blueRect, blockRects)) redX = Math.min(window.innerWidth - cubeSize, redX + moveStep);
+      if (keys['w'] && canMoveCube(redX, redY, 0, -moveStep, blueRect, blockRects)) redY = Math.max(0, redY - moveStep);
+      if (keys['s'] && canMoveCube(redX, redY, 0, moveStep, blueRect, blockRects)) redY = Math.min(window.innerHeight - cubeSize, redY + moveStep);
+      // Blue cube: Arrow keys
+      redRect = getCubeRect(redX, redY); // update after red moves
+      if (keys['arrowleft'] && canMoveCube(blueX, blueY, -moveStep, 0, redRect, blockRects)) blueX = Math.max(0, blueX - moveStep);
+      if (keys['arrowright'] && canMoveCube(blueX, blueY, moveStep, 0, redRect, blockRects)) blueX = Math.min(window.innerWidth - cubeSize, blueX + moveStep);
+      if (keys['arrowup'] && canMoveCube(blueX, blueY, 0, -moveStep, redRect, blockRects)) blueY = Math.max(0, blueY - moveStep);
+      if (keys['arrowdown'] && canMoveCube(blueX, blueY, 0, moveStep, redRect, blockRects)) blueY = Math.min(window.innerHeight - cubeSize, blueY + moveStep);
+      setHomeCubePos();
+      updateKeyImagesOverlay();
+      requestAnimationFrame(homeCubeLoop);
+    }
+    homeCubeLoop();
+    document.getElementById('game-menu').onsubmit = function(e) {
+      e.preventDefault();
+      // Get selected options
+      const form = e.target;
+      const scoreType = form.scoreType.value;
+      const timer = form.timer.value;
+      const count = form.count.value;
+      const mapSize = form.mapSize.value;
+      const mode = form.mode.value;
+      const targetType = form.targetType.value;
+      const playerMode = form.playerMode.value;
+      // Build query string
+      let params = `?scoreType=${scoreType}`;
+      if (scoreType === 'time') params += `&timer=${timer}`;
+      else params += `&count=${count}`;
+      params += `&mapSize=${mapSize}`;
+      params += `&mode=${mode}`;
+      params += `&targetType=${targetType}`;
+      params += `&playerMode=${playerMode}`;
+      // Redirect to game page (medium.html for now)
+      window.location.href = 'medium.html' + params;
+    };
+  </script>
+  <!-- WASD Keys bottom left -->
+  <img src="assets/WASD Keys.png" alt="WASD Keys" style="position:fixed;left:24px;bottom:24px;width:400px;height:auto;z-index:3000;opacity:0.92;pointer-events:none;">
+  <!-- Arrow Keys bottom right -->
+  <img src="assets/Arrow Keys.png" alt="Arrow Keys" style="position:fixed;right:24px;bottom:24px;width:400px;height:auto;z-index:3000;opacity:0.92;pointer-events:none;">
+</body>
+</html>
