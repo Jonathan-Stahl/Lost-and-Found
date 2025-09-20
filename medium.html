@@ -253,7 +253,8 @@
       // Game options
       const scoreType = params.scoreType || 'time';
       const timerLimit = parseInt(params.timer || '60');
-      const countLimit = parseInt(params.count || '5');
+  let countLimit = 5;
+  countLimit = 3;
       const mapSize = (params.mapSize || '18x10').split('x').map(Number);
       const mode = params.mode || 'normal';
       const targetType = params.targetType || 'fixed';
@@ -686,6 +687,12 @@
                   popup.style.transform = 'translateY(-50px)';
                   setTimeout(() => { popup.style.display = 'none'; popup.style.transform = 'translateY(0)'; }, 400);
                 }, 200);
+                // Show finished scoreboard if either player reaches 3 in 2-player count mode
+                if (scoreType === 'count' && playerMode === 'multi' && (scoreP1 >= 3 || scoreP2 >= 3)) {
+                  let winner = scoreP1 >= 3 ? 'Player 1' : 'Player 2';
+                  showFinishedScreen(`${winner} reached 3 points and wins!`);
+                  return;
+                }
                 // Add delay before moving red box and changing color
                 setTimeout(() => {
                   let newIdx;
@@ -870,47 +877,22 @@
           document.getElementById('score-p1').textContent = scoreP1;
           document.getElementById('score-p2').textContent = scoreP2;
           p2Label.style.visibility = '';
+          // Hide timer in 2-player count mode
+          if (scoreType === 'count') {
+            document.getElementById('timer-label').style.display = 'none';
+          }
         } else {
           document.getElementById('score-p1').textContent = score;
           document.getElementById('score-p2').textContent = '';
           p2Label.style.visibility = 'hidden';
+          // Show timer in single player modes
+          document.getElementById('timer-label').style.display = '';
         }
-        const timerElem = document.getElementById('timer');
         if (scoreType === 'time') {
+          const timerElem = document.getElementById('timer');
           let min = Math.floor(timeElapsed / 60);
           let sec = timeElapsed % 60;
           timerElem.textContent = `${min}:${sec.toString().padStart(2, '0')}`;
-        } else {
-          document.getElementById('timer-label').textContent = `Time: ${Math.floor(timeElapsed/60)}:${(timeElapsed%60).toString().padStart(2,'0')}`;
-        }
-        // Timer flash logic
-        if (scoreType === 'time') {
-          const timeLeft = timerLimit - timeElapsed;
-          if (timeLeft === 10 && !timerElem.classList.contains('flash-red-10')) {
-            timerElem.classList.add('flash-red-10');
-            timerElem.style.transition = 'color 0.2s';
-            timerElem.style.color = '#f44336';
-            setTimeout(() => {
-              timerElem.style.color = '';
-              timerElem.classList.remove('flash-red-10');
-            }, 400);
-          }
-          if (timeLeft <= 5 && timeLeft > 0) {
-            if (!timerElem.classList.contains('flash-red-5')) {
-              timerElem.classList.add('flash-red-5');
-            }
-            timerElem.style.transition = 'color 0.2s';
-            timerElem.style.color = '#f44336';
-            setTimeout(() => {
-              timerElem.style.color = '';
-            }, 400);
-            // Remove flash-red-5 after last flash
-            if (timeLeft === 1) {
-              setTimeout(() => {
-                timerElem.classList.remove('flash-red-5');
-              }, 500);
-            }
-          }
         }
       }
       updateScoreTimer();
@@ -922,7 +904,8 @@
             showFinishedScreen(`Time's up! Your score: ${score}`);
           }
         }, 1000);
-      } else {
+      } else if (playerMode !== 'multi') {
+        // Only increment timer for single player count mode
         timerInterval = setInterval(() => {
           timeElapsed++;
           updateScoreTimer();
