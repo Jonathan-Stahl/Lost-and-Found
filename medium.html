@@ -192,8 +192,8 @@
   <div id="score-timer" style="position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:2000;font-size:2rem;background:#222c;padding:8px 10px;border-radius:50px;color:#fff;box-shadow:0 2px 8px #000a;display:flex;gap:32px;align-items:center;border:1px solid rgba(255,255,255,0.5);padding-right:20px;min-width:480px;max-width:600px;">
     <span id="score-label-p1" style="min-width:120px;max-width:120px;display:inline-block;text-align:left;color:#e53935;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">P1: <span id="score-p1">0</span></span>
     <div style="display:flex;flex-direction:row;align-items:center;justify-content:center;gap:16px;min-width:180px;max-width:180px;">
-  <a href="home.html" style="width:48px;height:48px;min-width:48px;min-height:48px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.15);padding:4px;border-radius:50%;text-decoration:none;box-shadow:0 2px 12px #000a;">
-        <img src="assets/home.png" alt="Home" style="width:30px;height:30px;filter:invert(1) drop-shadow(0 2px 8px #000a);">
+  <a href="index.html" style="width:48px;height:48px;min-width:48px;min-height:48px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.15);padding:4px;border-radius:50%;text-decoration:none;box-shadow:0 2px 12px #000a;">
+        <img src="assets/home.png" alt="Index" style="width:30px;height:30px;filter:invert(1) drop-shadow(0 2px 8px #000a);">
       </a>
       <span id="timer-label" style="white-space:nowrap;">Time: <span id="timer">0:00</span></span>
     </div>
@@ -205,7 +205,7 @@
     <div id="finished-screen" style="display:none;position:fixed;left:0;top:0;width:100vw;height:100vh;background:rgba(33,33,33,0.95);color:#fff;z-index:5000;align-items:center;justify-content:center;flex-direction:column;font-size:2rem;">
       <div style="background:#222;padding:48px 64px;border-radius:24px;box-shadow:0 4px 32px #000a;display:flex;flex-direction:column;align-items:center;">
         <div id="finished-message" style="margin-bottom:32px;"></div>
-        <button onclick="window.location.href='home.html'" class="finish-btn finish-btn-blue">Go to Menu</button>
+        <button onclick="window.location.href='index.html'" class="finish-btn finish-btn-blue">Go to Menu</button>
         <button onclick="location.reload()" class="finish-btn finish-btn-red">Try Again</button>
       </div>
     </div>
@@ -581,21 +581,29 @@
             blocked = true;
             rect.classList.add('bounce');
             let overlay = rect.querySelector('.black-overlay');
-            overlay.style.opacity = '0';
-            rect.classList.add('bounce');
+            // If target box (color 11), reveal red color like other boxes
             if (rect.dataset.color === '11') {
               // Stop green movement
               if (greenMoveInterval) {
                 clearInterval(greenMoveInterval);
                 greenMoveInterval = null;
               }
+              overlay.style.opacity = '0';
+              setTimeout(() => {
+                if (mode !== 'speed') {
+                  overlay.style.opacity = '1';
+                }
+                rect.classList.remove('bounce');
+              }, 300);
+            } else {
+              overlay.style.opacity = '0';
+              setTimeout(() => {
+                if (mode !== 'speed') {
+                  overlay.style.opacity = '1';
+                }
+                rect.classList.remove('bounce');
+              }, 300);
             }
-            setTimeout(() => {
-              if (mode !== 'speed') {
-                overlay.style.opacity = '1';
-              } // In speed mode, keep overlay transparent
-              rect.classList.remove('bounce');
-            }, 300);
             break;
           }
         }
@@ -937,13 +945,15 @@
               redRect.classList.add('scored');
               redRect.classList.add('bounce');
               let overlay = redRect.querySelector('.black-overlay');
-              // Always transparent in speed mode
+              // Reveal red color for a short time in all non-speed modes
               if (mode === 'speed') {
                 overlay.style.opacity = '0';
               } else {
-                overlay.style.opacity = '1';
+                overlay.style.opacity = '0';
+                setTimeout(() => {
+                  overlay.style.opacity = '1';
+                }, 300);
               }
-              redRect.classList.add('bounce');
               // Hit red box
               if (playerMode === 'multi') {
                 scoreP1++;
